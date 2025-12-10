@@ -1,0 +1,388 @@
+/* 
+ * Dynamic Portfolio Edit Mode CSS
+ * This file adds editing functionality without breaking template styles
+ */
+
+/* =======================================================
+   EDIT BUTTONS
+   ======================================================== */
+
+/* Edit button - hidden by default, shown in edit mode */
+.edit-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: none; /* Hidden by default */
+}
+
+.edit-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 1 !important;
+}
+
+/* Make elements with data-section relative for positioning */
+[data-section] {
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+/* Edit mode styles - only applied when logged in */
+.edit-mode-active [data-section]:hover {
+    background-color: rgba(102, 126, 234, 0.05);
+    border-radius: 4px;
+}
+
+/* FIXED: Edit buttons always show in edit mode */
+.edit-mode-active .edit-btn {
+    display: block !important;
+    opacity: 0.8 !important;
+}
+
+.edit-mode-active [data-section]:hover .edit-btn {
+    opacity: 1 !important;
+}
+
+/* =======================================================
+   ADMIN TOOLBAR HEADER (REPLACE THE PREVIOUS ONE)
+   ======================================================== */
+
+.admin-toolbar-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 15px;
+    margin: 0; /* Changed from -10px -15px */
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+    font-size: 0.85rem; /* Slightly smaller */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    line-height: 1.2;
+}
+
+.admin-toolbar-header i {
+    font-size: 0.9rem;
+}
+
+/* Update the existing #dynamic-admin-toolbar styles */
+#dynamic-admin-toolbar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 0;
+    z-index: 9999;
+    border: 1px solid #e0e0e0;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    min-width: 200px; /* Set a minimum width */
+    overflow: hidden; /* Ensure content doesn't overflow rounded corners */
+}
+
+#dynamic-admin-toolbar .btn-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 15px;
+    justify-content: center; /* Center buttons */
+}
+
+/* =======================================================
+   NOTIFICATIONS
+   ======================================================== */
+
+.dynamic-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    display: none;
+    animation: slideDown 0.3s ease;
+    font-weight: 500;
+    min-width: 300px;
+    text-align: center;
+    border: none;
+}
+
+.dynamic-notification.error {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+.dynamic-notification.info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+@keyframes slideDown {
+    from {
+        top: -50px;
+        opacity: 0;
+    }
+    to {
+        top: 20px;
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* =======================================================
+   MODAL CUSTOMIZATIONS
+   ======================================================== */
+
+/* Custom modal header */
+#dynamic-edit-modal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: 0;
+    padding: 1rem 1.5rem;
+}
+
+#dynamic-edit-modal .modal-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+#dynamic-edit-modal .section-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    margin-left: 10px;
+    font-weight: normal;
+    letter-spacing: 0.5px;
+}
+
+#dynamic-edit-modal .btn-close {
+    filter: invert(1) brightness(2);
+    opacity: 0.8;
+}
+
+#dynamic-edit-modal .btn-close:hover {
+    opacity: 1;
+}
+
+#dynamic-edit-modal .modal-body {
+    padding: 1.5rem;
+}
+
+#dynamic-edit-modal .modal-footer {
+    border-top: 1px solid #eee;
+    padding: 1rem 1.5rem;
+}
+
+/* Form styling */
+#dynamic-edit-form .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+#dynamic-edit-form .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 0.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#dynamic-edit-form .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+#dynamic-edit-form .form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* JSON items styling */
+.json-item {
+    margin-bottom: 0.5rem;
+}
+
+.json-item-input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.remove-json-item {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* =======================================================
+   LOGOUT TOAST
+   ======================================================== */
+
+/* Logout toast at top right */
+.logout-toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9998;
+}
+
+.logout-toast-container .toast {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.logout-toast-container .toast-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+}
+
+.logout-toast-container .toast-header .btn-light {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 6px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.logout-toast-container .toast-header .btn-light:hover {
+    background: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* =======================================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================================== */
+
+@media (max-width: 768px) {
+    #dynamic-admin-toolbar {
+        top: 60px; /* Adjusted for mobile */
+        right: 10px;
+        left: 10px;
+        width: calc(100% - 20px);
+    }
+    
+    #dynamic-admin-toolbar .btn-group {
+        justify-content: center;
+    }
+    
+    .logout-toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+    
+    .logout-toast-container .toast {
+        width: 100%;
+    }
+    
+    .edit-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+        top: -8px;
+        right: -8px;
+    }
+}
+
+/* =======================================================
+   ANIMATIONS
+   ======================================================== */
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+    }
+}
+
+.edit-mode-active .edit-btn {
+    animation: pulse 2s infinite;
+}
+
+/* =======================================================
+   UTILITY CLASSES
+   ======================================================== */
+
+.edit-mode-active {
+    cursor: default;
+}
+
+.no-edit {
+    pointer-events: none;
+}
+
+.highlight-edit {
+    outline: 2px dashed #667eea;
+    outline-offset: 2px;
+}
+
+/* Loading state */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
