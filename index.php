@@ -136,21 +136,20 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
             </div>
 
             <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
-              <div class="hero-visual">
-                  <div class="profile-container">
-                      <div class="profile-background"></div>
-                      <div class="image-wrapper" style="position: relative; display: inline-block;" 
-                          data-section="media" 
-                          data-field="hero_image">
-                          <img src="assets/img/profile/profile-2.webp" 
-                              alt="Alexander Chen" 
-                              class="profile-image"
-                              data-section="media"
-                              data-field="hero_image">
-                      </div>
-                  </div>
-              </div>
-          </div>
+                <div class="hero-visual">
+                    <div class="profile-container">
+                        <div class="profile-background"></div>
+                        <div class="image-wrapper" 
+                            style="position: relative; display: inline-block;"
+                            data-section="media"
+                            data-field="hero_image">
+                            <img src="assets/img/profile/profile-2.webp" 
+                                alt="Alexander Chen" 
+                                class="profile-image">
+                        </div>
+                    </div>
+                </div>
+            </div>
 
           </div>
         </div>

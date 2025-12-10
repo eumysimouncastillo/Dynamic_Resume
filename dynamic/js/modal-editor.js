@@ -68,16 +68,9 @@ class ModalEditor {
     }
 
     openEditModal(element) {
+        this.currentElement = element;
         const section = element.getAttribute('data-section');
         const field = element.getAttribute('data-field');
-        
-        // Check if this is an image field
-        if (field.includes('_image') || element.tagName === 'IMG' || field.includes('image')) {
-            this.openImageEditModal(element);
-            return;
-        }
-        
-        this.currentElement = element;
         
         // Get current value
         let currentValue = '';
@@ -110,7 +103,53 @@ class ModalEditor {
         this.modal.show();
     }
 
-    // SAFE METHOD: Update element without removing edit button - SIMPLEST FIX
+    // Get text content without edit button
+    getElementText(element) {
+        // Clone the element to avoid modifying the original
+        const clone = element.cloneNode(true);
+        
+        // Remove edit button if it exists
+        const editBtn = clone.querySelector('.edit-btn');
+        if (editBtn) {
+            editBtn.remove();
+        }
+        
+        // Return the text content
+        return clone.textContent.trim();
+    }
+
+    async saveContent() {
+        if (!this.currentElement) return;
+        
+        const section = this.currentElement.getAttribute('data-section');
+        const field = this.currentElement.getAttribute('data-field');
+        let newContent = '';
+        
+        // Get content based on field type
+        if (field === 'typed_items') {
+            newContent = document.getElementById('typed-items').value;
+        } else {
+            newContent = document.getElementById('edit-content').value;
+        }
+        
+        // Save via content loader
+        const result = await this.loader.updateContent(section, field, newContent);
+        
+        if (result.success) {
+            // Update UI - use safe method that preserves edit button
+            this.updateElementSafely(this.currentElement, field, newContent);
+            
+            // Show success message
+            this.loader.showNotification('Content updated successfully!');
+            
+            // Close modal
+            this.modal.hide();
+        } else {
+            this.loader.showNotification('Error saving changes: ' + (result.error || 'Unknown error'), 'error');
+        }
+    }
+
+    // SAFE METHOD: Update element without removing edit button
     updateElementSafely(element, field, newContent) {
         if (field === 'typed_items') {
             element.setAttribute('data-typed-items', newContent);
@@ -130,222 +169,30 @@ class ModalEditor {
         } else if (element.querySelector('.btn-text')) {
             element.querySelector('.btn-text').textContent = newContent;
         } else {
-            // Find and update only text nodes, ignore buttons
-            let hasTextNode = false;
-            for (let child of element.childNodes) {
-                if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
-                    child.textContent = newContent;
-                    hasTextNode = true;
-                    break;
-                }
+            // Get existing edit button
+            const existingEditBtn = element.querySelector('.edit-btn');
+            
+            // Clear element but preserve edit button
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
             }
             
-            // If no text node found, create one at the beginning
-            if (!hasTextNode) {
-                const textNode = document.createTextNode(newContent);
-                element.insertBefore(textNode, element.firstChild);
-            }
-        }
-    }
-
-    // NEW METHOD: Handle image upload
-    openImageEditModal(element) {
-        this.currentElement = element;
-        const section = element.getAttribute('data-section');
-        const field = element.getAttribute('data-field');
-        const currentImage = element.getAttribute('src');
-        
-        // Create special image upload modal
-        const imageModalHTML = `
-            <div class="modal fade" id="image-upload-modal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">
-                                <i class="bi bi-image"></i> Edit Image
-                                <span class="section-badge">${section}.${field}</span>
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="text-center mb-4">
-                                <h6>Current Image</h6>
-                                <img src="${currentImage}" alt="Current" class="img-fluid rounded mb-3" style="max-height: 200px;">
-                                <p class="text-muted small">${currentImage}</p>
-                            </div>
-                            
-                            <form id="image-upload-form">
-                                <div class="mb-3">
-                                    <label for="image-upload" class="form-label">Upload New Image/GIF</label>
-                                    <input type="file" class="form-control" id="image-upload" accept=".jpg,.jpeg,.png,.gif,.webp">
-                                    <div class="form-text">
-                                        Maximum file size: 5MB. Allowed: JPG, PNG, GIF, WebP
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="image-url" class="form-label">Or Enter Image URL</label>
-                                    <input type="text" class="form-control" id="image-url" placeholder="https://example.com/image.jpg">
-                                </div>
-                                
-                                <div class="image-preview mb-3" id="image-preview" style="display: none;">
-                                    <h6>Preview</h6>
-                                    <img id="preview-image" src="" alt="Preview" class="img-fluid rounded" style="max-height: 150px;">
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-danger" id="remove-image">Remove Image</button>
-                            <button type="button" class="btn btn-primary" id="save-image">Save Image</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Remove existing image modal if any
-        const existingModal = document.getElementById('image-upload-modal');
-        if (existingModal) {
-            existingModal.remove();
-        }
-        
-        // Add modal to body
-        document.body.insertAdjacentHTML('beforeend', imageModalHTML);
-        const imageModal = new bootstrap.Modal(document.getElementById('image-upload-modal'));
-        
-        // Setup event listeners for image modal
-        const imageUpload = document.getElementById('image-upload');
-        const imageUrl = document.getElementById('image-url');
-        const previewContainer = document.getElementById('image-preview');
-        const previewImage = document.getElementById('preview-image');
-        
-        // Preview uploaded image
-        imageUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    previewContainer.style.display = 'block';
-                    imageUrl.value = ''; // Clear URL field
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Preview from URL
-        imageUrl.addEventListener('input', function() {
-            if (this.value) {
-                previewImage.src = this.value;
-                previewContainer.style.display = 'block';
-                imageUpload.value = ''; // Clear file input
-            } else {
-                previewContainer.style.display = 'none';
-            }
-        });
-        
-        // Save image
-        document.getElementById('save-image').addEventListener('click', () => {
-            this.saveImage(element, section, field, imageModal);
-        });
-        
-        // Remove image
-        document.getElementById('remove-image').addEventListener('click', () => {
-            this.removeImage(element, section, field, imageModal);
-        });
-        
-        // Show modal
-        imageModal.show();
-    }
-
-    // NEW METHOD: Save uploaded image
-    async saveImage(element, section, field, modal) {
-        const imageUpload = document.getElementById('image-upload');
-        const imageUrl = document.getElementById('image-url');
-        
-        let imagePath = '';
-        
-        // Check if file was uploaded
-        if (imageUpload.files && imageUpload.files[0]) {
-            const formData = new FormData();
-            formData.append('image', imageUpload.files[0]);
-            formData.append('section', section);
-            formData.append('field', field);
+            // Add the new text
+            element.appendChild(document.createTextNode(newContent));
             
-            try {
-                const response = await fetch('/dynamic_resume/dynamic/api/upload-image.php', {
-                    method: 'POST',
-                    body: formData
+            // Re-add the edit button if it existed
+            if (existingEditBtn) {
+                // Clone the button to avoid reference issues
+                const newEditBtn = existingEditBtn.cloneNode(true);
+                
+                // Re-add event listener
+                newEditBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.openEditModal(element);
                 });
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    imagePath = result.path;
-                } else {
-                    this.loader.showNotification('Upload failed: ' + result.error, 'error');
-                    return;
-                }
-            } catch (error) {
-                this.loader.showNotification('Upload error: ' + error.message, 'error');
-                return;
-            }
-        } 
-        // Check if URL was entered
-        else if (imageUrl.value.trim()) {
-            imagePath = imageUrl.value.trim();
-        } else {
-            this.loader.showNotification('Please select an image or enter a URL', 'error');
-            return;
-        }
-        
-        // Save to database via content loader
-        const result = await this.loader.updateContent(section, field, imagePath);
-        
-        if (result.success) {
-            // Update image src
-            if (imagePath.startsWith('http')) {
-                element.src = imagePath;
-            } else {
-                // Remove any leading slash to avoid double slashes
-                element.src = imagePath.replace(/^\//, '');
-            }
-            
-            // Close modal
-            modal.hide();
-            
-            // Remove modal from DOM
-            document.getElementById('image-upload-modal').remove();
-            
-            this.loader.showNotification('Image updated successfully!');
-        } else {
-            this.loader.showNotification('Error saving image: ' + result.error, 'error');
-        }
-    }
-
-    // NEW METHOD: Remove image
-    async removeImage(element, section, field, modal) {
-        if (confirm('Are you sure you want to remove this image?')) {
-            // Set to default/placeholder image
-            const defaultImage = 'assets/img/placeholder.jpg'; // Create this placeholder
-            
-            // Save to database
-            const result = await this.loader.updateContent(section, field, defaultImage);
-            
-            if (result.success) {
-                // Update image src
-                element.src = defaultImage;
-                
-                // Close modal
-                modal.hide();
-                
-                // Remove modal from DOM
-                document.getElementById('image-upload-modal').remove();
-                
-                this.loader.showNotification('Image removed successfully!');
-            } else {
-                this.loader.showNotification('Error removing image: ' + result.error, 'error');
+                element.appendChild(newEditBtn);
             }
         }
     }
