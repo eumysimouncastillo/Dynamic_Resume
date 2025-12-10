@@ -49,7 +49,7 @@ if (!file_exists(__DIR__ . '/../../uploads')) {
 // Move uploaded file
 if (move_uploaded_file($file['tmp_name'], $upload_path)) {
     // Return the relative path for frontend
-    $relative_path = 'uploads/' . $filename;
+    $relative_path = 'dynamic_resume/uploads/' . $filename;
     
     // Save to database (you'll need to update your sections table)
     require_once __DIR__ . '/../../config/db.php';

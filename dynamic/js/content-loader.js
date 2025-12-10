@@ -1,4 +1,4 @@
- // Content Loader - Fetches and displays content from database
+// Content Loader - Fetches and displays content from database
 class ContentLoader {
     constructor() {
         this.contentData = {};
@@ -75,13 +75,19 @@ class ContentLoader {
             if (this.contentData[section] && this.contentData[section][field] !== undefined) {
                 const content = this.contentData[section][field];
                 
-                // Update element content
-                if (element.classList.contains('typed')) {
+                // Update element content - FIXED: Added image handling
+                if (element.tagName === 'IMG') {
+                    // Handle image elements
+                    element.src = this.getImagePath(content);
+                } else if (element.classList.contains('typed')) {
                     // Special handling for typed items
                     element.setAttribute('data-typed-items', content);
                 } else if (element.querySelector('.contact-text')) {
                     // Update contact text span
                     element.querySelector('.contact-text').textContent = content;
+                } else if (element.querySelector('.btn-text')) {
+                    // Update button text
+                    element.querySelector('.btn-text').textContent = content;
                 } else {
                     // Update regular text
                     element.textContent = content;
@@ -91,7 +97,7 @@ class ContentLoader {
     }
 
     enableEditMode() {
-        // Add edit mode class to body - FIXED: Use correct class name
+        // Add edit mode class to body
         document.body.classList.add('edit-mode-active');
         
         // Create edit buttons
@@ -153,7 +159,7 @@ class ContentLoader {
         document.body.appendChild(toolbar);
         toolbar.style.display = 'block';
         
-        // FIXED: Use setTimeout to ensure buttons exist before adding event listeners
+        // Use setTimeout to ensure buttons exist before adding event listeners
         setTimeout(() => {
             const refreshBtn = document.getElementById('refresh-content');
             const toggleBtn = document.getElementById('toggle-edit');
@@ -167,7 +173,6 @@ class ContentLoader {
             
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', () => {
-                    // FIXED: Toggle the correct class name
                     document.body.classList.toggle('edit-mode-active');
                 });
             }
@@ -220,6 +225,20 @@ class ContentLoader {
         setTimeout(() => {
             notification.style.display = 'none';
         }, 3000);
+    }
+
+    getImagePath(content) {
+        if (content.startsWith('http')) {
+            return content;
+        } else if (content.startsWith('/')) {
+            return content;
+        } else if (content.startsWith('dynamic_resume/')) {
+            // Already has dynamic_resume, just add leading slash
+            return '/' + content;
+        } else {
+            // Add dynamic_resume/ for other paths
+            return '/dynamic_resume/' + content;
+        }
     }
 }
 

@@ -136,12 +136,16 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
             </div>
 
             <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
-              <div class="hero-visual">
-                <div class="profile-container">
-                  <div class="profile-background"></div>
-                  <img src="assets/img/profile/profile-2.webp" alt="Alexander Chen" class="profile-image">
+                <div class="hero-visual">
+                    <div class="profile-container">
+                        <div class="profile-background"></div>
+                        <img src="assets/img/profile/profile-2.webp" 
+                            alt="Alexander Chen" 
+                            class="profile-image"
+                            data-section="media"
+                            data-field="hero_image">
+                    </div>
                 </div>
-              </div>
             </div>
 
           </div>
@@ -733,6 +737,7 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
   <!-- Dynamic Portfolio Scripts -->
   <script type="module" src="dynamic/js/content-loader.js"></script>
   <script type="module" src="dynamic/js/modal-editor.js"></script>
+  <script src="/dynamic_resume/dynamic/js/image-uploader.js"></script>
 
 </body>
 
