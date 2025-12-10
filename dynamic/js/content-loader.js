@@ -1,4 +1,4 @@
-// Content Loader - Fetches and displays content from database
+ // Content Loader - Fetches and displays content from database
 class ContentLoader {
     constructor() {
         this.contentData = {};
